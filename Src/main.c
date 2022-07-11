@@ -144,12 +144,6 @@ int main(void)
  
 	while (1)
   {
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)Sine_Wave_LUT, 128, DAC_ALIGN_12B_R);
-		HAL_Delay(1000);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)Saw_Wave_LUT, 128, DAC_ALIGN_12B_R);
-		HAL_Delay(1000);
-		HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)Tri_Wave_LUT, 128, DAC_ALIGN_12B_R);
-		
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
