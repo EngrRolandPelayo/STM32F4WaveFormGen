@@ -58,6 +58,8 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_DAC_Init(void);
 static void MX_TIM2_Init(void);
+static void Begin_DAC(uint32_t* pData);
+void DMATransferComplete(DMA_HandleTypeDef *hdma);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -131,12 +133,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
-  MX_DAC_Init();
-  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, (uint32_t*)Tri_Wave_LUT, 128, DAC_ALIGN_12B_R);
-  HAL_TIM_Base_Start(&htim2);
+   HAL_DMA_RegisterCallback(&hdma_dac1, HAL_DMA_XFER_CPLT_CB_ID, &DMATransferComplete);
+	 Begin_DAC((uint32_t*)Tri_Wave_LUT);
+//		HAL_Delay(2000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -145,31 +145,56 @@ int main(void)
 	while (1)
   {
     /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+//		Begin_DAC((uint32_t*)Saw_Wave_LUT);
+//		HAL_Delay(2000);
+//    HAL_DAC_Stop(&hdac, DAC_CHANNEL_1);
+//		HAL_Delay(2000); 
+	  /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
+}
+
+void Begin_DAC(uint32_t* pData)
+{
+	MX_DMA_Init();
+  MX_DAC_Init();
+  MX_TIM2_Init();
+  /* USER CODE BEGIN 2 */
+	HAL_DAC_Start_DMA(&hdac, DAC_CHANNEL_1, pData, 128, DAC_ALIGN_12B_R);
+  HAL_TIM_Base_Start(&htim2);
+}
+
+void DMATransferComplete(DMA_HandleTypeDef *hdma)
+{
+  Begin_DAC((uint32_t*)Tri_Wave_LUT);
 }
 
 // External Interrupt ISR Handler CallBackFun
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	  HAL_GPIO_TogglePin(USER_LED1_GPIO_Port,USER_LED1_Pin);
-    if(GPIO_Pin == FREQ_ADJ_Pin) // INT Source is pin A9
+    if(GPIO_Pin == K1_FREQ_MIN_Pin) // INT Source is pin A9
     {
-				//Change wave frequency
+				//decrease wave frequency
 				periodValue = periodValue + 10;
-			  __HAL_TIM_SET_AUTORELOAD(&htim2,periodValue);
 		}
-		else if(GPIO_Pin == WAVE_SEL_Pin)
+		else if(GPIO_Pin == K0_FREQ_PLUS_Pin)
 		{
-				//Change waveform
-//			waveMode++;
-//			if(waveMode > 2)
-//				waveMode = 0;		
+				//increase wave frequency
+				periodValue = periodValue - 10;
+			  if(HAL_GPIO_ReadPin(K1_FREQ_MIN_GPIO_Port, K1_FREQ_MIN_Pin) == GPIO_PIN_RESET)
+				{
+					//Change waveform
+					waveMode++;
+					if(waveMode > 2)
+						waveMode = 0;		
+				}
 		}
 		if(periodValue < 200 || periodValue > 500 )
 				periodValue = 327;
+		
+		__HAL_TIM_SET_AUTORELOAD(&htim2,periodValue);
+	
 }
 
 /**
@@ -331,8 +356,8 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(USER_LED1_GPIO_Port, USER_LED1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : FREQ_ADJ_Pin WAVE_SEL_Pin */
-  GPIO_InitStruct.Pin = FREQ_ADJ_Pin|WAVE_SEL_Pin;
+  /*Configure GPIO pins : K1_FREQ_MIN_Pin K0_FREQ_PLUS_Pin */
+  GPIO_InitStruct.Pin = K1_FREQ_MIN_Pin|K0_FREQ_PLUS_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);

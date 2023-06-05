@@ -58,12 +58,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define FREQ_ADJ_Pin GPIO_PIN_3
-#define FREQ_ADJ_GPIO_Port GPIOE
-#define FREQ_ADJ_EXTI_IRQn EXTI3_IRQn
-#define WAVE_SEL_Pin GPIO_PIN_4
-#define WAVE_SEL_GPIO_Port GPIOE
-#define WAVE_SEL_EXTI_IRQn EXTI4_IRQn
+#define K1_FREQ_MIN_Pin GPIO_PIN_3
+#define K1_FREQ_MIN_GPIO_Port GPIOE
+#define K1_FREQ_MIN_EXTI_IRQn EXTI3_IRQn
+#define K0_FREQ_PLUS_Pin GPIO_PIN_4
+#define K0_FREQ_PLUS_GPIO_Port GPIOE
+#define K0_FREQ_PLUS_EXTI_IRQn EXTI4_IRQn
 #define USER_LED1_Pin GPIO_PIN_6
 #define USER_LED1_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
